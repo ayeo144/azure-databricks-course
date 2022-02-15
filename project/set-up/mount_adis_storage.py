@@ -1,9 +1,18 @@
 # Databricks notebook source
+def mount(container_name, storage_account_name, configs):
+    dbutils.fs.mount(
+        source = f"abfss://{container_name}@{storage_account_name}.dfs.core.windows.net/",
+        mount_point = f"/mnt/{storage_account_name}/{container_name}",
+        extra_configs = configs
+    )
+
+# COMMAND ----------
+
 # access information for our storage blob
 storage_account_name = "formula1ay"
-client_id = ""
-tenant_id = ""
-client_secret = ""
+client_id = dbutils.secrets.get(scope="formula1-scope", key="databricks-app-client-id")
+tenant_id = dbutils.secrets.get(scope="formula1-scope", key="databricks-app-tenant-id")
+client_secret = dbutils.secrets.get(scope="formula1-scope", key="databricks-app-client-secret")
 
 # COMMAND ----------
 
@@ -18,15 +27,6 @@ configs = {
 
 # COMMAND ----------
 
-def mount(container_name, storage_account_name, configs):
-    dbutils.fs.mount(
-        source = f"abfss://{container_name}@{storage_account_name}.dfs.core.windows.net/",
-        mount_point = f"/mnt/{storage_account_name}/{container_name}",
-        extra_configs = configs
-    )
-
-# COMMAND ----------
-
 mount("raw", storage_account_name, configs)
 
 # COMMAND ----------
@@ -35,16 +35,11 @@ mount("processed", storage_account_name, configs)
 
 # COMMAND ----------
 
-# MAGIC %fs
-# MAGIC 
-# MAGIC ls mnt/formula1ay/
+# dbutils.fs.unmount("/mnt/formula1ay/processed")
 
 # COMMAND ----------
 
-dbutils.fs.ls("/mnt/formula1ay/raw")
-
-# COMMAND ----------
-
+# list mounted storage to check the operation has completed succesfully
 dbutils.fs.mounts()
 
 # COMMAND ----------
